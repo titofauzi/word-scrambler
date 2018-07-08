@@ -25,6 +25,7 @@ class HomeController extends Controller
     public function index()
     {
 	$session_id = DB::table('scores')->select(DB::raw("DISTINCT ON (session_id, name) session_id, name, created_at"))->get();
+	$session_id = DB::select('SELECT * FROM (SELECT DISTINCT ON (session_id, name) session_id, name, created_at FROM scores) sub order by 3 desc');
 	foreach ($session_id as $ind_session_id) {
 		$scores = DB::table('scores')
 			  ->where('session_id', '=', $ind_session_id->session_id)

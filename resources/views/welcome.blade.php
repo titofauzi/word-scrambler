@@ -81,7 +81,45 @@
         </style>
     </head>
     <body>
-      <div class="container-fluid"> 
+     
+	 <nav class="navbar navbar-expand-md navbar-light navbar-laravel shadow-sm">
+         
+                <a class="navbar-brand h1" href="{{ url('/') }}">
+                    {{ config('app.name', 'Laravel') }}
+                </a>
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="{{ __('Toggle navigation') }}">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                    <!-- Left Side Of Navbar -->
+                    <ul class="navbar-nav mr-auto">
+
+                    </ul>
+
+                    <!-- Right Side Of Navbar -->
+                    <ul class="navbar-nav ml-auto">
+                        <!-- Authentication Links -->
+                        @guest
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ route('login') }}">Admin</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ route('register') }}">{{ __('Register') }}</a>
+                            </li>
+                        @else
+			     <li class="nav-item">
+				<a class="nav-link" href="{{ url('/home') }}">Home</a>
+                            </li>
+                       
+                          
+                        @endguest
+                    </ul>
+                </div>
+         
+          </nav>
+	  <div class="container-fluid">
+	  <?php /*
             @if (Route::has('login'))
 	    <div class ="row align-items-left">
                 <div class="links col-3 my-4">
@@ -94,6 +132,7 @@
                 </div>
 	   </div>
             @endif
+	   */ ?>
 	 
             <div class="row align-items-start">
 		<!--
@@ -134,6 +173,7 @@
 			<p style="font-size:40px">
 				Thank you for playing <span id="your-name"></span>!
 				<br /> Your score is : <span id="final-score"></span>
+				<button id="play-again" class="btn btn-primary" type="button">Play Again</button>
 			</p>
 			    <div id="tell-name">
 				Please tell us your name :
@@ -141,7 +181,7 @@
 			   </div>
 		    </div>
 		</div>
-		<div id="display_score" class="col-md-6"></div>
+		<div id="display_score" class="col-md-6 mt-4"></div>
             </div>
      </div>
     </body>
@@ -149,8 +189,11 @@
 
 var timerStarted = false;
 
-window.onbeforeunload = function() {
-    if ($('#display_score').html() != "") {
+window.onbeforeunload = function() {a
+    if ($('#submit_name').hasClass('invisible') == false) {
+	return false;	
+    }
+    else if ($('#display_score').html() != "") {
 	return true;
     }
 };
@@ -199,6 +242,10 @@ $('#skip-button').click(function(){
         });	
 });
 
+$('#play-again').click(function() {
+	location.reload();
+});
+
 function display_score(){
 	$.ajax({
           method: "GET",
@@ -227,7 +274,7 @@ function startTimer() {
 timerStarted = true;
 // Set the date we're counting down to
 let countDownDate = new Date();
-countDownDate.setSeconds(countDownDate.getSeconds() + 30);
+countDownDate.setSeconds(countDownDate.getSeconds() + 60);
 
 // Update the count down every 1 second
 let x = setInterval(function() {
@@ -246,7 +293,8 @@ let x = setInterval(function() {
   if (distance < 0) {
     clearInterval(x);
     document.getElementById("countdown").innerHTML = "EXPIRED";
-    $("#quiz").addClass("invisible");
+    //$("#quiz").addClass("invisible");
+    $("#quiz").text("");
     $("#submit_name").removeClass("invisible");
     show_submit_name();
   }

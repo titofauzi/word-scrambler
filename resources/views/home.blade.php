@@ -22,9 +22,15 @@
 		<pre>
 		<?php //print_r($session_id);die(); ?>
 		</pre>
+		    <div class="row">
 		    @foreach ($session_id as $ind_session_id)
+			<div class="col">
 			<div class="card-header">
-				{{ $ind_session_id['ind_session_id'] }} [{{ $ind_session_id['name'] }}] {{ $ind_session_id['created_at'] }}
+			
+				@if ($ind_session_id['name'] != "")  [<strong>{{ $ind_session_id['name'] }}</strong>] 
+				@else [<strong>guest</strong>]
+				@endif
+				{{ $ind_session_id['created_at'] }}
 			</div>
 			<table class="table">
 			<tr><th>Word</th><th>Answer</th><th>Score</th></tr>
@@ -34,7 +40,9 @@
 			 @endforeach
 			<tr><td></td><td></td><td>{{ $ind_session_id['sum'] }}</td></tr>
 			</table>
+			</div>
                     @endforeach
+		    </div>
 		</div>
             </div>
         </div>
