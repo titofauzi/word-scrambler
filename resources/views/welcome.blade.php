@@ -119,42 +119,8 @@
          
           </nav>
 	  <div class="container-fluid">
-	  <?php /*
-            @if (Route::has('login'))
-	    <div class ="row align-items-left">
-                <div class="links col-3 my-4">
-                    @auth
-                        <a href="{{ url('/home') }}">Home</a>
-                    @else
-                        <a href="{{ route('login') }}">Login</a>
-                        <a href="{{ route('register') }}">Register</a>
-                    @endauth
-                </div>
-	   </div>
-            @endif
-	   */ ?>
 	 
             <div class="row align-items-start">
-		<!--
-                <div class="title m-b-md hidden">
-                    Laravel
-                </div>
-		-->
-
-		<!--
-                <div class="links">
-                    @foreach ($links as $link)
-                        <a href="{{ $link->url }}">{{ $link->title }}</a>
-                    @endforeach
-                    
-                    <a href="https://laravel.com/docs">Documentation</a>
-                    <a href="https://laracasts.com">Laracasts</a>
-                    <a href="https://laravel-news.com">News</a>
-                    <a href="https://forge.laravel.com">Forge</a>
-                    <a href="https://github.com/laravel/laravel">GitHub</a>
-                
-                </div>
-		-->
 		<div class="col-md-6 align-top">
 		    <div id="quiz">	
 			<span class="title" id="soal">
@@ -176,7 +142,7 @@
 				<button id="play-again" class="btn btn-primary" type="button">Play Again</button>
 			</p>
 			    <div id="tell-name">
-				Please tell us your name :
+				Please enter your name to see the highscore:
 				<input type="text" id="text-name" class="textbox" />
 			   </div>
 		    </div>
@@ -314,6 +280,19 @@ function show_submit_name(){
         });
 }
 
+function show_high_score(){
+	 $.ajax({  
+          method: "GET",
+          url: "gethighscore",
+          data: {  }
+        })
+          .done(function( msg ) {           
+            $('#tell-name').html(msg);
+            //$("#soal").html(msg.word);
+            //$("#encrypted_word").val(msg.encrypted_word);
+        });
+}
+
 $('#text-name').keypress(function (e) {
   let key = e.which;
   if(key == 13){
@@ -325,7 +304,8 @@ $('#text-name').keypress(function (e) {
         })
           .done(function( msg ) {           
 	    $("#your-name").text($("#text-name").val());
-	    $("#tell-name").addClass("invisible");
+	    show_high_score();
+	    //$("#tell-name").addClass("invisible");
             //$('#final-score').text(msg);
             //$("#soal").html(msg.word);
             //$("#encrypted_word").val(msg.encrypted_word);

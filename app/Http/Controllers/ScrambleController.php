@@ -12,20 +12,9 @@ use Illuminate\Support\Facades\Crypt;
 
 class ScrambleController extends Controller
 {
-    /**
-     * Show the profile for the given user.
-     *
-     * @param  int  $id
-     * @return Response
-     */
-
+   
     private $_reward_modifier = 2;
     private $_punishment_modifier = -1;
-
-    public function show($id)
-    {
-        return view('user.profile', ['user' => User::findOrFail($id)]);
-    }
 
     public function get_word(){
 	$word = DB::table('words_common')->inRandomOrder()->select('words')->get()->first();
@@ -111,5 +100,19 @@ class ScrambleController extends Controller
 	DB::table('scores')
             ->where('session_id', session()->getId())
             ->update(['name' => $request->n]);
+    }
+	
+    public function highscore(){
+	$return = '<table class="table table-sm">';
+        $return .= '<tr><th>Name</th><th>Score</th></tr>';
+        
+        $scores = DB::select("select sum(score) score,session_id, coalesce(name,'guest') as name from scores group by session_id, name order by 1 desc limit 10");
+	$sum = 0;
+        foreach($scores as $score) {
+		 $return .= '<t><td>'.$score->name.'</td><td>'.$score->score.'</td></tr>';
+        }
+        $return .= '</table>';
+
+        echo $return;
     }
 }

@@ -36,6 +36,8 @@ Route::get('/display_score','ScrambleController@display_score');
 
 Route::get('/getfinalscore','ScrambleController@getfinalscore');
 
+Route::get('/gethighscore','ScrambleController@highscore');
+
 Route::post('/tellname','ScrambleController@tellname');
 
 Auth::routes();
