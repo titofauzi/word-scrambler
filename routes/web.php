@@ -14,26 +14,15 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Crypt;
 
 Route::get('/', function () {
-    //return view('home');
     $links = \App\Link::all();
-
-//$s1 = 'bokepo';
-//$s2 = 'kepboo';
-//echo str_ireplace(str_split($s2), "", $s1);
-//$sim = similar_text('umeket', 'ketemu', $perc);
-//echo "similarity: $sim ($perc %)\n";    
-//$a1=array("a","b","b","c");
-//$a2=array("a","c","b");
-
-//$result=array_diff($a1,$a2);
-//print_r($result);
-//    $word = \App\Words::inRandomOrder()->select('word')->get()->first(); 
+    session()->regenerate();
     $word = DB::table('words_common')->inRandomOrder()->select('words')->get()->first();
-//var_dump($word);die();
     $scrambled_word = str_shuffle($word->words);
-//    echo $word['word'];
-	$encrypted_word = Crypt::encryptString($word->words);
-    return view('welcome', ['links' => $links, 'word' => $scrambled_word, 'original_word' => $word->words , 'encrypted_word' => $encrypted_word ]);
+    $encrypted_word = Crypt::encryptString($word->words);
+    return view('welcome', ['links' => $links, 
+			    'word' => $scrambled_word, 
+			    'original_word' => $word->words , 
+			    'encrypted_word' => $encrypted_word ]);
 });
 
 
@@ -41,7 +30,13 @@ Route::get('/scrambler', 'ScrambleController@get_word');
 
 Route::post('/scrambler','ScrambleController@submit_word');
 
+Route::post('/skip','ScrambleController@skip');
+
 Route::get('/display_score','ScrambleController@display_score');
+
+Route::get('/getfinalscore','ScrambleController@getfinalscore');
+
+Route::post('/tellname','ScrambleController@tellname');
 
 Auth::routes();
 

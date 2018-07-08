@@ -5,9 +5,9 @@
     <div class="row justify-content-center">
         <div class="col-md-12">
             <div class="card">
-                <div class="card-header">Dashboard</div>
+                <div class="card-header d-none">Dashboard</div>
 
-                <div class="card-body hidden">
+                <div class="card-body d-none">
                     @if (session('status'))
                         <div class="alert alert-success" role="alert">
                             {{ session('status') }}
@@ -24,13 +24,15 @@
 		</pre>
 		    @foreach ($session_id as $ind_session_id)
 			<div class="card-header">
-				{{ $ind_session_id['ind_session_id'] }}
+				{{ $ind_session_id['ind_session_id'] }} [{{ $ind_session_id['name'] }}] {{ $ind_session_id['created_at'] }}
 			</div>
 			<table class="table">
 			<tr><th>Word</th><th>Answer</th><th>Score</th></tr>
 			 @foreach ($ind_session_id['scores'] as $score)
 			<tr><td>{{ $score['word'] }}</td><td>{{ $score['answer']  }}</td><td>{{ $score['score'] }}</td></tr>	
+			
 			 @endforeach
+			<tr><td></td><td></td><td>{{ $ind_session_id['sum'] }}</td></tr>
 			</table>
                     @endforeach
 		</div>

@@ -21,6 +21,7 @@ class ScrambleController extends Controller
 
     private $_reward_modifier = 2;
     private $_punishment_modifier = -1;
+
     public function show($id)
     {
         return view('user.profile', ['user' => User::findOrFail($id)]);
@@ -62,17 +63,53 @@ class ScrambleController extends Controller
 	}
     }
 
+    public function skip(Request $request){
+	$decrypted_word = Crypt::decryptString($request->e);
+	$score = new Score;
+        $score->word = $decrypted_word;
+        $score->answer = 'SKIP';
+        $score->score = -2;
+        $score->session_id = session()->getId();
+        $score->save();
+    }
+
+    public function getfinalscore(Request $request){
+        $scores = DB::table('scores')->where('session_id', '=', session()->getId())
+					->sum('score')
+					;
+    	return response()->json($scores);
+    }
+
     public function display_score(){
 
-	$return = '<table>';
+	$return = '<table class="table table-sm">';
+	$return .= '<tr><th>Answer</th><th>Score</th></tr>';
 	$scores = DB::table('scores')->where('session_id', '=', session()->getId())->orderBy('created_at', 'desc')->get();
-
+	$sum = 0;
 	foreach($scores as $score) {
-		$return .= '<tr><td>'.$score->answer.'</td><td>'.$score->score.'</td></tr>';
+		
+		if($score->answer == 'SKIP'){
+			$class= "text-info";
+		}
+		else if ($score->score < 0 ){
+			$class = "text-danger";
+		}
+		else {
+			$class = "";		
+		}
+		
+		$return .= '<tr class="'.$class.'"><td>'.$score->answer.'</td><td>'.$score->score.'</td></tr>';
+		$sum = $sum + $score->score;	
 	}
-	
+	$return .= '<tr><td></td><td id="table-final-score" class="font-weight-bold">'.$sum.'</td><tr>';
 	$return .= '</table>';
-
+	
 	echo $return;
+    }
+	
+    public function tellname(Request $request){
+	DB::table('scores')
+            ->where('session_id', session()->getId())
+            ->update(['name' => $request->n]);
     }
 }

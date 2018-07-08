@@ -6,12 +6,15 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
 	<meta name="csrf-token" content="{{ csrf_token() }}">	
 
-        <title>Laravel</title>
+        <title>Word Scrambler</title>
 	<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" integrity="sha384-WskhaSGFgHYWDcbwN70/dfYBj47jz9qbsMId/iRN3ewGhXQFZCSftd1LZCfmhktB" crossorigin="anonymous">
+
         <!-- Fonts -->
         <link href="https://fonts.googleapis.com/css?family=Raleway:100,600" rel="stylesheet" type="text/css">
 
         <!-- Styles -->
+    	<!--<link href="{{ asset('css/app.css') }}" rel="stylesheet">-->
         <style>
             html, body {
                 background-color: #fff;
@@ -73,14 +76,15 @@
   		/*margin: 10px;
   		padding: 5px;*/
   		font-size: 60px;
-		text-align : center;
+		text-align : left;
 	   }
         </style>
     </head>
     <body>
-        <div class="flex-center position-ref full-height">
+      <div class="container-fluid"> 
             @if (Route::has('login'))
-                <div class="top-right links">
+	    <div class ="row align-items-left">
+                <div class="links col-3 my-4">
                     @auth
                         <a href="{{ url('/home') }}">Home</a>
                     @else
@@ -88,9 +92,10 @@
                         <a href="{{ route('register') }}">Register</a>
                     @endauth
                 </div>
+	   </div>
             @endif
-
-            <div class="content">
+	 
+            <div class="row align-items-start">
 		<!--
                 <div class="title m-b-md hidden">
                     Laravel
@@ -111,18 +116,44 @@
                 
                 </div>
 		-->
-		<div class="title m-b-md" id="soal">
+		<div class="col-md-6 align-top">
+		    <div id="quiz">	
+			<span class="title" id="soal">
 			{{ $word }}
+			</span>
+			<button type="button" class="btn btn-link align-self-center" id="skip-button">Skip</button>
+	   <?php /*	<div>{{ $original_word }}</div>
+		<div><?php echo Session::getId(); ?></div> */ ?>
+			<input type="hidden" value="{{ $encrypted_word }}" id="encrypted_word" />
+			<div style="margin-bottom:5px">
+				<input type="text" id="text-answer" class="textbox" autofocus />
+			</div>
+			<div id="countdown"></div>
+		    </div>
+		    <div id="submit_name" class="invisible">
+			<p style="font-size:40px">
+				Thank you for playing <span id="your-name"></span>!
+				<br /> Your score is : <span id="final-score"></span>
+			</p>
+			    <div id="tell-name">
+				Please tell us your name :
+				<input type="text" id="text-name" class="textbox" />
+			   </div>
+		    </div>
 		</div>
-		<div>{{ $original_word }}</div>
-		<div><?php echo Session::getId(); ?></div>
-		<input type="hidden" value="{{ $encrypted_word }}" id="encrypted_word" />
-		<div style="margin-bottom:5px"><input type="text" id="text-answer" class="textbox" /></div>
-		<div id="display_score"></div>
+		<div id="display_score" class="col-md-6"></div>
             </div>
-        </div>
+     </div>
     </body>
 <script>
+
+var timerStarted = false;
+
+window.onbeforeunload = function() {
+    if ($('#display_score').html() != "") {
+	return true;
+    }
+};
 
 $.ajaxSetup({
     headers: {
@@ -131,12 +162,10 @@ $.ajaxSetup({
 });
 
 $('#text-answer').keypress(function (e) {
-//console.log('dad');
  var key = e.which;
  if(key == 13)  // the enter key code
   {
-//    $('input[name = butAssignProd]').click();
-  //  return false;  
+	if(timerStarted == false){startTimer();}
 	$.ajax({
 	  method: "POST",
 	  url: "scrambler",
@@ -144,20 +173,31 @@ $('#text-answer').keypress(function (e) {
 	})
 	  .done(function( msg ) {
 	    obj = jQuery.parseJSON(msg);
-		//console.log(obj);
-	    if(obj.result == '1') { 
-		console.log(obj.result);
+	    if(obj.result == '1') { //when correct
 		display_score();
 		get_new_word();
-            } else {
+		
+            } else { //when wrong
 		display_score();
 		}
-	    //alert( "Data Saved: " + msg );
+	   $("#text-answer").val("");
 	});
-
-	
   }
 });   
+
+$('#skip-button').click(function(){
+	$.ajax({
+          method: "POST",
+          url: "skip",
+          data: { e : $("#encrypted_word").val() }
+        })
+          .done(function( msg ) {
+            //obj = jQuery.parseJSON(msg);
+            display_score();
+                get_new_word();
+           $("#text-answer").val("");
+        });	
+});
 
 function display_score(){
 	$.ajax({
@@ -165,12 +205,9 @@ function display_score(){
           url: "display_score",
           data: {  }
         })
-          .done(function( msg ) {
-                //alert(msg);
+          .done(function( msg ) { 
              $("#display_score").html(msg);
-            //alert( "Data Saved: " + msg );
           });
-
 }
 
 function get_new_word(){
@@ -179,15 +216,75 @@ function get_new_word(){
           url: "scrambler",
           data: {  }
         })
-          .done(function( msg ) {
-	   //caonsole.log(msg);
-	    //obj = jQuery.parseJSON(msg);
-	 //  console.log(obj);
+          .done(function( msg){
 	    $("#soal").html(msg.word);
 	    $("#encrypted_word").val(msg.encrypted_word);
-            //alert( "Data Saved: " + msg );
+           
         });
 }
+
+function startTimer() {
+timerStarted = true;
+// Set the date we're counting down to
+let countDownDate = new Date();
+countDownDate.setSeconds(countDownDate.getSeconds() + 30);
+
+// Update the count down every 1 second
+let x = setInterval(function() {
+
+  // Get todays date and time
+  let now = new Date().getTime();
+
+  // Find the distance between now an the count down date
+  let distance = countDownDate - now;
+
+  // Display the result in the element with id="demo"
+ // document.getElementById("countdown").innerHTML = days + "d " + hours + "h "
+ // + minutes + "m " + seconds + "s ";
+  document.getElementById("countdown").innerHTML = Math.floor(distance/1000) + "s";
+  // If the count down is finished, write some text 
+  if (distance < 0) {
+    clearInterval(x);
+    document.getElementById("countdown").innerHTML = "EXPIRED";
+    $("#quiz").addClass("invisible");
+    $("#submit_name").removeClass("invisible");
+    show_submit_name();
+  }
+}, 1000);
+}
+
+function show_submit_name(){
+	 $.ajax({  
+          method: "GET",
+          url: "getfinalscore",
+          data: {  }
+        })
+          .done(function( msg ) {           
+            $('#final-score').text(msg);
+            //$("#soal").html(msg.word);
+            //$("#encrypted_word").val(msg.encrypted_word);
+        });
+}
+
+$('#text-name').keypress(function (e) {
+  let key = e.which;
+  if(key == 13){
+
+	$.ajax({  
+          method: "POST",
+          url: "tellname",
+          data: { n:($('#text-name').val())  }
+        })
+          .done(function( msg ) {           
+	    $("#your-name").text($("#text-name").val());
+	    $("#tell-name").addClass("invisible");
+            //$('#final-score').text(msg);
+            //$("#soal").html(msg.word);
+            //$("#encrypted_word").val(msg.encrypted_word);
+        });
+  }
+});
+
 
 </script>
 </html>

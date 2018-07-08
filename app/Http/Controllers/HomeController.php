@@ -24,17 +24,26 @@ class HomeController extends Controller
      */
     public function index()
     {
-	$session_id = DB::table('scores')->select('session_id')->distinct()->get();
+	$session_id = DB::table('scores')->select(DB::raw("DISTINCT ON (session_id, name) session_id, name, created_at"))->get();
 	foreach ($session_id as $ind_session_id) {
-		$scores = DB::table('scores')->where('session_id', '=', $ind_session_id->session_id)->orderBy('created_at', 'desc')->get();
+		$scores = DB::table('scores')
+			  ->where('session_id', '=', $ind_session_id->session_id)
+			  ->orderBy('created_at', 'desc')
+			  ->get();
 		$array_1 = []; //re-initialize array
+		$sum = 0;
 		foreach($scores as $score) {
 			$array_1[] = ["word" => $score->word, 
 					"answer" => $score->answer, 
 					"score" => $score->score];
+			$sum = $sum + $score->score;
 		}
-			$array[]= array_add(['ind_session_id' => $ind_session_id->session_id], 
-					    'scores', $array_1);
+			$array_2= array_add(['ind_session_id' => $ind_session_id->session_id,
+					     'name' => $ind_session_id->name,
+					     'created_at' => $ind_session_id->created_at],
+					     'scores', $array_1
+						);
+			$array[]= array_add($array_2,'sum',$sum);
 		
 	}
         return view('home', ['session_id' => $array]);
